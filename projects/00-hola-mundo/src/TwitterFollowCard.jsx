@@ -3,6 +3,12 @@ import { useState } from "react";
 export function TwitterFollowCard({ children, userName = '_unknow' }) {
     const [isFollowing, setIsFollowing] = useState(false);
 
+    console.log('[twitterFollowCard] render with userName: ', userName);
+
+    // Coments
+    /**
+     * Comments in a code
+     */
     const imgSrc = `https://unavatar.io/${userName}`;
     const text = isFollowing ? 'Siguiendo' : 'Seguir';
     const buttonClassname = isFollowing ? 'tw-followCard-button is-following' : 'tw-followCard-button';
@@ -20,6 +26,8 @@ export function TwitterFollowCard({ children, userName = '_unknow' }) {
                     <span className='tw-followCard-infoUserName'>@{userName}</span>
                 </div>
             </header>
+
+            {/* Comment inside JSX */}
             <aside>
                 <button className={buttonClassname} onClick={handleClick}>{text}</button>
             </aside>

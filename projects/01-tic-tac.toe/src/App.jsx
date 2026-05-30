@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './App.css'
+import confetti from 'canvas-confetti';
 
 const TURNS = {
   X: 'x',
@@ -53,6 +54,10 @@ function App() {
     return null;
   }
 
+  const checkEndGame = (boardToCheck) => {
+    return boardToCheck.every(square => square !== null);
+  }
+
   const updateBoard = (index) => {
     // Don't update the board if the square is already filled
     if (board[index] || winner) return;
@@ -66,7 +71,9 @@ function App() {
     const newWinner = checkWinner(newBoard);
     if (newWinner) {
       setWinner(newWinner);
-      alert(`The winner is ${newWinner}`);
+      confetti();
+    } else if (checkEndGame(newBoard)) {
+      setWinner(false); // It's a tie
     }
 
     // Change the turn
@@ -74,9 +81,22 @@ function App() {
     setTurn(newTurn);
   };
 
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setTurn(TURNS.X);
+    setWinner(null);
+  }
+
+  const changePlayerStart = () => {
+    resetGame();
+    setTurn(turn === TURNS.X ? TURNS.O : TURNS.X);
+  }
+
   return (
     <main className='board'>
       <h1>Tic Tac Toe</h1>
+      <button onClick={resetGame}>Reset Game</button>
+      <button onClick={changePlayerStart}>Change Player</button>
       <section className='game'>
         {
           board.map((_, index) => {
@@ -95,6 +115,25 @@ function App() {
         <Square isSelected={turn === TURNS.X}>{TURNS.X}</Square>
         <Square isSelected={turn === TURNS.O}>{TURNS.O}</Square>
       </section>
+      {
+        winner !== null && (
+          <section className='winner'>
+            <div className='text'>
+              <h2>{
+                winner === false
+                  ? 'It\'s a tie!'
+                  : `The winner is`
+              }</h2>
+              <header className='win'>
+                {winner && <Square>{winner}</Square>}
+              </header>
+              <footer>
+                <button onClick={resetGame}>Play Again</button>
+              </footer>
+            </div>
+          </section>
+        )
+      }
     </main>
   )
 }

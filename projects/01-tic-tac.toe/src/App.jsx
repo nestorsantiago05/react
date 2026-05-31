@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css'
 import confetti from 'canvas-confetti';
 
@@ -6,11 +6,26 @@ import { Square } from './components/Square';
 import { TURNS, WINNER_COMBOS } from './constants.js';
 import { checkWinnerFrom, checkEndGame } from './logic/board';
 import { WinnerModal } from './components/WinnerModal.jsx';
+import { getBoardFromStorage, resetGameStorage, saveGameToStorage, getTurnFromStorage } from './logic/storage/index.js';
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null));
+  console.log("Render");
 
-  const [turn, setTurn] = useState(TURNS.X);
+  const [board, setBoard] = useState(() => {
+    console.log("Start status board");
+
+    const boardFromStorage = getBoardFromStorage();
+    return boardFromStorage
+      ? JSON.parse(boardFromStorage)
+      : Array(9).fill(null);
+  });
+
+  const [turn, setTurn] = useState(() => {
+    console.log("Start status turn");
+
+    const turnFromStorage = getTurnFromStorage();
+    return turnFromStorage ?? TURNS.X;
+  });
 
   const [winner, setWinner] = useState(null);
 
@@ -23,6 +38,15 @@ function App() {
     newBoard[index] = turn;
     setBoard(newBoard);
 
+    // Change the turn
+    const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
+    setTurn(newTurn);
+
+    saveGameToStorage({
+      board: newBoard,
+      turn: newTurn
+    });
+
     // Check for a winner
     const newWinner = checkWinnerFrom(newBoard);
     if (newWinner) {
@@ -32,21 +56,25 @@ function App() {
       setWinner(false); // It's a tie
     }
 
-    // Change the turn
-    const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X;
-    setTurn(newTurn);
   };
 
   const resetGame = () => {
     setBoard(Array(9).fill(null));
     setTurn(TURNS.X);
     setWinner(null);
+
+    resetGameStorage();
   }
 
   const changePlayerStart = () => {
     resetGame();
     setTurn(turn === TURNS.X ? TURNS.O : TURNS.X);
   }
+
+  useEffect(() => {
+    console.log("Use effect");
+    resetGameStorage();
+  }, [winner]);
 
   return (
     <main className='board'>
